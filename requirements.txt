@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+sqlalchemy
+oracledb
+aiofiles
+aioodbc
+celery[redis]
+kombu

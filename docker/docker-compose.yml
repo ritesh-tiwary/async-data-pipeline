@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  fastapi:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: fastapi-app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - sybase
+    environment:
+      - DATABASE_URL=mssql+pymssql://username:password@sybase/database
+    networks:
+      - backend
+
+  celery-worker:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.worker
+    container_name: celery-worker
+    depends_on:
+      - sybase
+    environment:
+      - CELERY_BROKER_URL=mssql+pymssql://username:password@sybase/database
+      - CELERY_RESULT_BACKEND=mssql+pymssql://username:password@sybase/database
+    networks:
+      - backend
+
+  sybase:
+    image: datagrip/sybase:latest  # Replace with actual Sybase image
+    container_name: sybase
+    environment:
+      - SYBASE_USER=username
+      - SYBASE_PASSWORD=password
+      - SYBASE_DB=database
+    ports:
+      - "5000:5000"
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
