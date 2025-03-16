@@ -1,13 +1,13 @@
 {
-    "name": "MongoDB Dev Container",
-    "build": {
-      "dockerfile": "Dockerfile"
-    },
-    "forwardPorts": [27017],
-    "postCreateCommand": "sudo service mongod start",
-    "containerEnv": {
-      "MONGO_INITDB_ROOT_USERNAME": "admin",
-      "MONGO_INITDB_ROOT_PASSWORD": "password",
-      "MONGO_INITDB_DATABASE": "kombudb"
-    }
+  "name": "MongoDB Dev Container",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "forwardPorts": [27017],
+  "postCreateCommand": "/init-mongo.sh",
+  "containerEnv": {
+    "MONGO_INITDB_ROOT_USERNAME": "admin",
+    "MONGO_INITDB_ROOT_PASSWORD": "password",
+    "MONGO_INITDB_DATABASE": "kombudb"
+  }
 }
