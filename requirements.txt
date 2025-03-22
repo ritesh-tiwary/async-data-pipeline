@@ -6,3 +6,5 @@ aiofiles
 aioodbc
 celery[redis]
 kombu
+beanie
+motor

@@ -1,45 +1,54 @@
-version: '3.8'
-
 services:
-  fastapi:
+  fastapi_app:
     build:
       context: .
-      dockerfile: docker/Dockerfile
-    container_name: fastapi-app
+      dockerfile: Dockerfile.app
+    container_name: fastapi_app
+    restart: always
     ports:
       - "8000:8000"
     depends_on:
-      - sybase
+      - mongodb
+      - celery_worker
     environment:
-      - DATABASE_URL=mssql+pymssql://username:password@sybase/database
+      MONGO_URI: "mongodb://admin:secret@mongodb:27017"
+      CELERY_BROKER_URL: "mongodb://admin:secret@mongodb:27017/celery_broker"
+      CELERY_RESULT_BACKEND: "mongodb://admin:secret@mongodb:27017/celery_results"
     networks:
       - backend
 
-  celery-worker:
+  celery_worker:
     build:
       context: .
-      dockerfile: docker/Dockerfile.worker
-    container_name: celery-worker
+      dockerfile: Dockerfile.worker
+    container_name: celery_worker
+    restart: always
     depends_on:
-      - sybase
+      - mongodb
     environment:
-      - CELERY_BROKER_URL=mssql+pymssql://username:password@sybase/database
-      - CELERY_RESULT_BACKEND=mssql+pymssql://username:password@sybase/database
+      MONGO_URI: "mongodb://admin:secret@mongodb:27017"
+      CELERY_BROKER_URL: "mongodb://admin:secret@mongodb:27017/celery_broker"
+      CELERY_RESULT_BACKEND: "mongodb://admin:secret@mongodb:27017/celery_results"
     networks:
       - backend
 
-  sybase:
-    image: datagrip/sybase:latest  # Replace with actual Sybase image
-    container_name: sybase
-    environment:
-      - SYBASE_USER=username
-      - SYBASE_PASSWORD=password
-      - SYBASE_DB=database
+  mongodb:
+    build:
+      context: .
+      dockerfile: Dockerfile.db
+    container_name: mongodb
+    restart: always
     ports:
-      - "5000:5000"
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: secret
+    volumes:
+      - mongo_data:/data/db
     networks:
       - backend
-
+volumes:
+  mongo_data:
 networks:
   backend:
-    driver: bridge
+    driver: backend

@@ -1,20 +1,15 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: celery-worker
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: celery
-  template:
-    metadata:
-      labels:
-        app: celery
-    spec:
-      containers:
-      - name: celery
-        image: myrepo/celery-worker:latest
-        env:
-        - name: DATABASE_URL
-          value: "mssql+pymssql://username:password@sybase/database"
+FROM python:3.10
+
+WORKDIR /worker
+
+COPY . /worker
+
+RUN pip install --upgrade pip
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+EXPOSE 5000
+
+ENV MONGO_URI="mongodb://admin:secret@mongodb:27017"
+
+CMD ["celery", "--app", "app.worker.celery", "worker", "--loglevel=info"]

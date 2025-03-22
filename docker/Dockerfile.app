@@ -1,52 +1,15 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: fastapi-app
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: fastapi
-  template:
-    metadata:
-      labels:
-        app: fastapi
-    spec:
-      containers:
-      - name: fastapi
-        image: myrepo/fastapi-app:latest
-        ports:
-        - containerPort: 8000
-        env:
-        - name: DATABASE_URL
-          value: "mssql+pymssql://username:password@sybase/database"
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: fastapi-service
-spec:
-  selector:
-    app: fastapi
-  ports:
-  - protocol: TCP
-    port: 80
-    targetPort: 8000
-  type: ClusterIP
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: fastapi-ingress
-spec:
-  rules:
-  - host: api.mydomain.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: fastapi-service
-            port:
-              number: 80
+FROM python:3.10
+
+WORKDIR /app
+
+COPY . /app
+
+RUN pip install --upgrade pip
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+EXPOSE 8000
+
+ENV MONGO_URI="mongodb://admin:secret@mongodb:27017"
+
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
