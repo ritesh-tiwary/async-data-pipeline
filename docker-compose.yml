@@ -2,7 +2,7 @@ services:
   fastapi_app:
     build:
       context: .
-      dockerfile: Dockerfile.app
+      dockerfile: docker/Dockerfile.app
     container_name: fastapi_app
     restart: always
     ports:
@@ -14,13 +14,11 @@ services:
       MONGO_URI: "mongodb://admin:secret@mongodb:27017"
       CELERY_BROKER_URL: "mongodb://admin:secret@mongodb:27017/celery_broker"
       CELERY_RESULT_BACKEND: "mongodb://admin:secret@mongodb:27017/celery_results"
-    networks:
-      - backend
 
   celery_worker:
     build:
       context: .
-      dockerfile: Dockerfile.worker
+      dockerfile: docker/Dockerfile.worker
     container_name: celery_worker
     restart: always
     depends_on:
@@ -29,13 +27,11 @@ services:
       MONGO_URI: "mongodb://admin:secret@mongodb:27017"
       CELERY_BROKER_URL: "mongodb://admin:secret@mongodb:27017/celery_broker"
       CELERY_RESULT_BACKEND: "mongodb://admin:secret@mongodb:27017/celery_results"
-    networks:
-      - backend
 
   mongodb:
     build:
       context: .
-      dockerfile: Dockerfile.db
+      dockerfile: docker/Dockerfile.db
     container_name: mongodb
     restart: always
     ports:
@@ -45,10 +41,5 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: secret
     volumes:
       - mongo_data:/data/db
-    networks:
-      - backend
 volumes:
   mongo_data:
-networks:
-  backend:
-    driver: backend

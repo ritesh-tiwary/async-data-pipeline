@@ -9,6 +9,10 @@ from celery.result import AsyncResult
 
 app = FastAPI()
 
+@app.get('/')
+def root():
+    return {"message": "Application is running"}
+
 
 # Producer function to read file content and put it in the queue
 async def producer(files: List[UploadFile], file_queue: asyncio.Queue):

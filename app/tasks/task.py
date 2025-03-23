@@ -4,7 +4,7 @@ from celery.exceptions import MaxRetriesExceededError
 
 
 @celery.task
-async def add(x, y):
+async def add(x, y):requirements
     result = x + y
     task = Task(task_id=add.request.id, status="completed", result=result)
     await task.insert()

@@ -17,6 +17,10 @@ env/
 .dockerignore
 Dockerfile*
 docker-compose.yml
+docker/
+deployment/
+scripts/
+tests/
 
 # Ignore logs and temporary files
 logs/

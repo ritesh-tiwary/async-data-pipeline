@@ -2,7 +2,9 @@ FROM python:3.10
 
 WORKDIR /worker
 
-COPY . /worker
+COPY ./app /worker
+
+COPY requirements.txt /worker/
 
 RUN pip install --upgrade pip
 
