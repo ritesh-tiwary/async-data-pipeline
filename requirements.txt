@@ -8,3 +8,5 @@ celery[redis]
 kombu
 beanie
 motor
+asyncpg
+pymongo

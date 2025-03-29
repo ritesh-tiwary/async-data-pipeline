@@ -8,12 +8,13 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - mongodb
+      - mongodb_broker
       - celery_worker
     environment:
-      MONGO_URI: "mongodb://admin:secret@mongodb:27017"
+      POSTGRES_CONFIG: '{"dbname":"tasks","user":"dbuser","password":"dbpassword","host":"postgres_db","port":"5432"}'
       CELERY_BROKER_URL: "mongodb://admin:secret@mongodb:27017/celery_broker"
       CELERY_RESULT_BACKEND: "mongodb://admin:secret@mongodb:27017/celery_results"
+    network_mode: host
 
   celery_worker:
     build:
@@ -22,24 +23,44 @@ services:
     container_name: celery_worker
     restart: always
     depends_on:
-      - mongodb
+      - mongodb_broker
     environment:
-      MONGO_URI: "mongodb://admin:secret@mongodb:27017"
-      CELERY_BROKER_URL: "mongodb://admin:secret@mongodb:27017/celery_broker"
-      CELERY_RESULT_BACKEND: "mongodb://admin:secret@mongodb:27017/celery_results"
+      POSTGRES_CONFIG: '{"dbname":"tasks","user":"dbuser","password":"dbpassword","host":"postgres_db","port":"5432"}'
+      CELERY_BROKER_URL: "mongodb://admin:secret@mongodb_broker:27017/celery_broker"
+      CELERY_RESULT_BACKEND: "mongodb://admin:secret@mongodb_broker:27017/celery_results"
+    network_mode: host
 
-  mongodb:
+  mongodb_broker:
     build:
       context: .
-      dockerfile: docker/Dockerfile.db
-    container_name: mongodb
+      dockerfile: docker/Dockerfile.broker
+    container_name: mongodb_broker
     restart: always
     ports:
       - "27017:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: secret
+    network_mode: host
     volumes:
       - mongo_data:/data/db
+
+  postgres_db:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.db
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_DB: tasks
+      POSTGRES_USER: dbuser
+      POSTGRES_PASSWORD: dbpassword
+    network_mode: host
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
 volumes:
   mongo_data:
+  postgres_data:

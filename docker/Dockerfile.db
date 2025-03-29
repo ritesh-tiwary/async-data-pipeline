@@ -1,6 +1,10 @@
-FROM mongo:latest
+FROM postgres:16
 
-ENV MONGO_INITDB_ROOT_USERNAME=admin
-ENV MONGO_INITDB_ROOT_PASSWORD=secret
+ENV POSTGRES_DB=tasks
+ENV POSTGRES_USER=dbuser
+ENV POSTGRES_PASSWORD=dbpassword
 
-EXPOSE 27017
+# Copy initialization SQL script if needed
+# COPY init.sql /docker-entrypoint-initdb.d/
+
+EXPOSE 5432

@@ -1,7 +1,7 @@
 # AsyncDataPipeline
 
 ## Overview
-**AsyncDataPipeline** is a high-performance, scalable FastAPI-based application designed for processing multiple files asynchronously. It uses the **Producer-Consumer** pattern with **Celery workers** to efficiently handle large batches of data and persist them into an **Oracle database**.
+**AsyncDataPipeline** is a high-performance, scalable FastAPI-based application designed for processing multiple files asynchronously. It uses the **Producer-Consumer** pattern with **Celery workers** to efficiently handle large batches of data and persist them into an **PostgreSQL database** and archive the data to **S3 Glacier** at the end of each financial year.
 
 ## Features
 - **Asynchronous File Processing** – Handles multiple files concurrently.
@@ -15,25 +15,25 @@
 ## Architecture
 1. **FastAPI Endpoint**: Accepts file uploads and pushes tasks to a Celery queue.
 2. **Celery Producer**: Queues tasks for batch processing.
-3. **Celery Workers (Consumers)**: Process files asynchronously and insert data into Oracle.
-4. **Oracle Database**: Stores the processed data.
-5. **Redis (Broker)**: Handles message queueing.
+3. **Celery Workers (Consumers)**: Process files asynchronously and insert data into PostgreSQL.
+4. **PostgreSQL Database**: Stores the processed data.
+5. **Mongodb (Broker)**: Handles message queueing.
 6. **Flower Dashboard** (Optional): Monitors Celery tasks.
 7. **Email Notification** (Optional): Notify permanently failed Celery tasks.
 
 ```plaintext
-┌──────────────┐      ┌──────────────┐      ┌──────────────┐      ┌──────────────┐      ┌──────────────┐
-│    Client    │ ---> │   FastAPI    │ ---> │    Redis     │ ---> │   Celery     │ ---> │   Oracle DB  │
-│   (Request)  │      │  (Producer)  │      │   (Queue)    │      │  (Workers)   │      │   (Storage)  │
-└──────────────┘      └──────────────┘      └──────────────┘      └──────────────┘      └──────────────┘
+┌──────────────┐      ┌──────────────┐      ┌──────────────┐      ┌──────────────┐      ┌──────────────┐      ┌────────────────┐
+│    Client    │ ---> │   FastAPI    │ ---> │   Mongodb    │ ---> │   Celery     │ ---> │PostgreSQL DB │ ---> │   S3 Glacier   │ 
+│   (Request)  │      │  (Producer)  │      │   (Queue)    │      │  (Workers)   │      │   (Storage)  │      │ (Cold Storage) │
+└──────────────┘      └──────────────┘      └──────────────┘      └──────────────┘      └──────────────┘      └────────────────┘      
 ```
 
 ## Installation
 ### Prerequisites
 - Python 3.9+
-- PostgreSQL / Oracle Database
-- Redis (as Celery broker)
-- Docker & Docker Compose (optional)
+- PostgreSQL
+- Mongodb (as Celery broker)
+- Docker & Docker Compose
 - Kubernetes (optional)
 
 ### Setup
@@ -59,13 +59,13 @@ pip install -r requirements.txt
 Set environment variables:
 ```bash
 export DATABASE_URL="oracle+cx_oracle://user:password@host:port/dbname"
-export CELERY_BROKER_URL="redis://localhost:6379/0"
+export CELERY_BROKER_URL="mongodb://user:password@mongodb:27017/celery_broker"
 ```
 
 Alternatively, create a `.env` file:
 ```
 DATABASE_URL=oracle+cx_oracle://user:password@host:port/dbname
-CELERY_BROKER_URL=redis://localhost:6379/0
+CELERY_BROKER_URL=mongodb://user:password@mongodb:27017/celery_broker
 ```
 
 ## Running the Application
