@@ -6,8 +6,9 @@
 
 from sqlalchemy import create_engine
 from processor.celeryconfig import db_url
+from app.settings import settings
 from kombu.transport.sqlalchemy.models import Base
 
-engine = create_engine(db_url)
+engine = create_engine(settings)
 Base.metadata.create_all(engine)
 print("Celery queue tables created successfully.")

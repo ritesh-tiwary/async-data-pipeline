@@ -8,13 +8,12 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - mongodb_broker
+      - mongodb_backend
       - celery_worker
     environment:
       POSTGRES_CONFIG: '{"dbname":"tasks","user":"dbuser","password":"dbpassword","host":"postgres_db","port":"5432"}'
       CELERY_BROKER_URL: "mongodb://admin:secret@mongodb:27017/celery_broker"
       CELERY_RESULT_BACKEND: "mongodb://admin:secret@mongodb:27017/celery_results"
-    network_mode: host
 
   celery_worker:
     build:
@@ -23,25 +22,34 @@ services:
     container_name: celery_worker
     restart: always
     depends_on:
-      - mongodb_broker
+      - mongodb_backend
     environment:
       POSTGRES_CONFIG: '{"dbname":"tasks","user":"dbuser","password":"dbpassword","host":"postgres_db","port":"5432"}'
-      CELERY_BROKER_URL: "mongodb://admin:secret@mongodb_broker:27017/celery_broker"
-      CELERY_RESULT_BACKEND: "mongodb://admin:secret@mongodb_broker:27017/celery_results"
-    network_mode: host
+      CELERY_BROKER_URL: "mongodb://admin:secret@mongodb_backend:27017/celery_broker"
+      CELERY_RESULT_BACKEND: "mongodb://admin:secret@mongodb_backend:27017/celery_results"
 
-  mongodb_broker:
+  redis_broker:
     build:
       context: .
       dockerfile: docker/Dockerfile.broker
-    container_name: mongodb_broker
+    container_name: redis_broker
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  mongodb_backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.broker
+    container_name: mongodb_backend
     restart: always
     ports:
       - "27017:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: secret
-    network_mode: host
     volumes:
       - mongo_data:/data/db
 
@@ -55,12 +63,12 @@ services:
       POSTGRES_DB: tasks
       POSTGRES_USER: dbuser
       POSTGRES_PASSWORD: dbpassword
-    network_mode: host
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/data/db
 
 volumes:
+  redis_data:
   mongo_data:
   postgres_data:

@@ -5,7 +5,7 @@ async def connect_db():
     DB_NAME = "tasks"
     DB_USER = "dbuser"
     DB_PASSWORD = "dbpassword"
-    DB_HOST = "postgres_db"
+    DB_HOST = "localhost"
     DB_PORT = "5432"
 
     try:

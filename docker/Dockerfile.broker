@@ -1,6 +1,8 @@
-FROM mongo:latest
+# Use official Redis as base
+FROM redis:7-alpine
 
-ENV MONGO_INITDB_ROOT_USERNAME=admin
-ENV MONGO_INITDB_ROOT_PASSWORD=secret
+# Optional: copy a custom Redis config
+COPY redis.conf /usr/local/etc/redis/redis.conf
 
-EXPOSE 27017
+# Start Redis with the custom config (if present)
+CMD ["redis-server", "/usr/local/etc/redis/redis.conf"]

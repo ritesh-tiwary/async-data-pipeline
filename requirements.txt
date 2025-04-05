@@ -1,7 +1,6 @@
 fastapi
 uvicorn
 sqlalchemy
-oracledb
 aiofiles
 aioodbc
 celery[redis]
@@ -10,3 +9,5 @@ beanie
 motor
 asyncpg
 pymongo
+pydantic
+pydantic_settings
