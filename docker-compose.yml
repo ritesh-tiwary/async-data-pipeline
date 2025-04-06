@@ -39,7 +39,7 @@ services:
   mongodb_backend:
     build:
       context: .
-      dockerfile: docker/Dockerfile.broker
+      dockerfile: docker/Dockerfile.backend
     container_name: mongodb_backend
     restart: always
     ports:
