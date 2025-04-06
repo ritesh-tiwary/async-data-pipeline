@@ -1,11 +1,9 @@
-from app.worker import Worker
+from app.worker import celery
 from app.logging import Logger
 from celery.exceptions import MaxRetriesExceededError
 
 
 class CeleryTask:
-    celery = Worker().celery
-
     def __init__(self):
         self.logger = Logger(__name__)
 
@@ -16,8 +14,8 @@ class CeleryTask:
         """
         try:
             result = x + y
-            task = Task(task_id=add_with_retry.request.id, status="completed", result=result)
-            await task.insert()
+            # task = Task(task_id=add_with_retry.request.id, status="completed", result=result)
+            # await task.insert()
             return result
         except Exception as e:
             self.logger.error(f"Error occurred: {e}")

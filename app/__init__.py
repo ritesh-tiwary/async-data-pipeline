@@ -3,16 +3,16 @@ import aiofiles
 from typing import List
 from fastapi import FastAPI, UploadFile, File
 
-from app.tasks import celery_task
+from app.tasks.celery_task import CeleryTask
 from celery.result import AsyncResult
 
 
 app = FastAPI()
+celery_task = CeleryTask()
 
 @app.get('/')
 def root():
     return {"message": "Application is running"}
-
 
 # Producer function to read file content and put it in the queue
 async def producer(files: List[UploadFile], file_queue: asyncio.Queue):
@@ -60,9 +60,14 @@ async def upload_files(files: List[UploadFile] = File(...)):
     
     return {"message": "Files processed successfully"}
 
+@app.get("/add/{x}/{y}")
+def add_numbers(x: int, y: int):
+    task = celery_task.delay. .add_with_retry(x, y)
+    return {"task_id": task.id}
+
 @app.get("/result/{task_id}")
 def get_result(task_id: str):
-    result = AsyncResult(task_id)
+    result = celery_task.AsyncResult(task_id)
     if result.failed():
         return {"task_id": task_id, "status": "Failed"}
     elif result.ready():
