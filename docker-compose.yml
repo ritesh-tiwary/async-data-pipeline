@@ -8,12 +8,7 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - mongodb_backend
       - celery_worker
-    environment:
-      POSTGRES_CONFIG: '{"dbname":"tasks","user":"dbuser","password":"dbpassword","host":"postgres_db","port":"5432"}'
-      CELERY_BROKER_URL: "mongodb://admin:secret@mongodb:27017/celery_broker"
-      CELERY_RESULT_BACKEND: "mongodb://admin:secret@mongodb:27017/celery_results"
 
   celery_worker:
     build:
@@ -22,11 +17,13 @@ services:
     container_name: celery_worker
     restart: always
     depends_on:
+      - postgres_db
+      - redis_broker
       - mongodb_backend
     environment:
       POSTGRES_CONFIG: '{"dbname":"tasks","user":"dbuser","password":"dbpassword","host":"postgres_db","port":"5432"}'
-      CELERY_BROKER_URL: "mongodb://admin:secret@mongodb_backend:27017/celery_broker"
-      CELERY_RESULT_BACKEND: "mongodb://admin:secret@mongodb_backend:27017/celery_results"
+      CELERY_BROKER_URL: "redis://localhost:6379/0"
+      CELERY_RESULT_BACKEND: "mongodb://admin:secret@mongodb:27017/celery_results"
 
   redis_broker:
     build:
@@ -47,9 +44,6 @@ services:
     restart: always
     ports:
       - "27017:27017"
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: secret
     volumes:
       - mongo_data:/data/db
 
@@ -59,10 +53,6 @@ services:
       dockerfile: docker/Dockerfile.db
     container_name: postgres_db
     restart: always
-    environment:
-      POSTGRES_DB: tasks
-      POSTGRES_USER: dbuser
-      POSTGRES_PASSWORD: dbpassword
     ports:
       - "5432:5432"
     volumes:

@@ -7,7 +7,7 @@
 - **Asynchronous File Processing** – Handles multiple files concurrently.
 - **Producer-Consumer Architecture** – Ensures optimal load distribution.
 - **Celery-based Task Execution** – For efficient background processing.
-- **Oracle Database Integration** – Reliable data persistence.
+- **PostgreSQL Database Integration** – Reliable data persistence.
 - **Docker & Kubernetes Support** – Easy deployment in cloud-native environments.
 - **Configurable Retry Mechanism** – Automatic reprocessing of failed tasks.
 - **Logging & Monitoring** – Integrated logging for debugging and performance monitoring.
@@ -17,22 +17,24 @@
 2. **Celery Producer**: Queues tasks for batch processing.
 3. **Celery Workers (Consumers)**: Process files asynchronously and insert data into PostgreSQL.
 4. **PostgreSQL Database**: Stores the processed data.
-5. **Mongodb (Broker)**: Handles message queueing.
-6. **Flower Dashboard** (Optional): Monitors Celery tasks.
-7. **Email Notification** (Optional): Notify permanently failed Celery tasks.
+5. **Redis (Broker)**: Handles message queueing.
+6. **Mongodb (Backend)**: Store result message.
+7. **Flower Dashboard** (Optional): Monitors Celery tasks.
+8. **Email Notification** (Optional): Notify permanently failed Celery tasks.
 
 ```plaintext
-┌──────────────┐      ┌──────────────┐      ┌──────────────┐      ┌──────────────┐      ┌──────────────┐      ┌────────────────┐
-│    Client    │ ---> │   FastAPI    │ ---> │   Mongodb    │ ---> │   Celery     │ ---> │PostgreSQL DB │ ---> │   S3 Glacier   │ 
-│   (Request)  │      │  (Producer)  │      │   (Queue)    │      │  (Workers)   │      │   (Storage)  │      │ (Cold Storage) │
-└──────────────┘      └──────────────┘      └──────────────┘      └──────────────┘      └──────────────┘      └────────────────┘      
+┌──────────────┐      ┌──────────────┐      ┌──────────────┐      ┌──────────────┐      ┌──────────────┐      ┌────────────────┐      ┌────────────────┐
+│    Client    │ ---> │   FastAPI    │ ---> │    Redis     │ ---> │   Celery     │ ---> │  Mongo DB    │ ---> │ PostgreSQL DB  │ ---> │   S3 Glacier   │ 
+│   (Request)  │      │  (Producer)  │      │   (Queue)    │      │  (Workers)   │      │  (Backend)   │      │   (Storage)    │      │ (Cold Storage) │
+└──────────────┘      └──────────────┘      └──────────────┘      └──────────────┘      └──────────────┘      └────────────────┘      └────────────────┘      
 ```
 
 ## Installation
 ### Prerequisites
 - Python 3.9+
 - PostgreSQL
-- Mongodb (as Celery broker)
+- Redis (as Celery broker)
+- Mongodb (as Celery backend)
 - Docker & Docker Compose
 - Kubernetes (optional)
 
@@ -58,14 +60,14 @@ pip install -r requirements.txt
 ## Configuration
 Set environment variables:
 ```bash
-export DATABASE_URL="oracle+cx_oracle://user:password@host:port/dbname"
-export CELERY_BROKER_URL="mongodb://user:password@mongodb:27017/celery_broker"
+export CELERY_BROKER_URL="redis://localhost:6379/0"
+export CELERY_RESULT_BACKEND="mongodb://user:password@mongodb:27017/celery_backend"
 ```
 
 Alternatively, create a `.env` file:
 ```
-DATABASE_URL=oracle+cx_oracle://user:password@host:port/dbname
-CELERY_BROKER_URL=mongodb://user:password@mongodb:27017/celery_broker
+CELERY_BROKER_URL="redis://localhost:6379/0"
+CELERY_RESULT_BACKEND="mongodb://user:password@mongodb:27017/celery_backend"
 ```
 
 ## Running the Application
@@ -134,6 +136,7 @@ kubectl apply -f k8s/
 - Add support for more file formats (JSON, XML, Parquet).
 - Implement automatic scaling of Celery workers.
 - Improve error handling and retries.
+- Add gRPC support for backend service integration.
 - Add WebSocket support for real-time progress updates.
 
 ## Contributing

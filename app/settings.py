@@ -11,7 +11,7 @@ class Settings(BaseSettings):
 
     # Celery settings
     CELERY_BROKER_URL: str = Field("redis://localhost:6379/0", env="CELERY_BROKER_URL")
-    CELERY_RESULT_BACKEND: str = Field("redis://localhost:6379/0", env="CELERY_RESULT_BACKEND")
+    CELERY_RESULT_BACKEND: str = Field("mongodb://admin:secret@mongodb:27017/celery_results", env="CELERY_RESULT_BACKEND")
 
     # API settings
     API_KEY: str = Field("your_api_key", env="API_KEY")
