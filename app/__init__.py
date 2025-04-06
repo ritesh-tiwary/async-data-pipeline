@@ -3,7 +3,7 @@ import aiofiles
 from typing import List
 from fastapi import FastAPI, UploadFile, File
 
-from app.tasks import task
+from app.tasks import celery_task
 from celery.result import AsyncResult
 
 
@@ -35,7 +35,7 @@ async def consumer(file_queue: asyncio.Queue):
             file_queue.task_done()
             break
         filename, content = item
-        task.save_to_db.delay(filename, content)
+        celery_task.save_to_db.delay(filename, content)
         file_queue.task_done()
 
 @app.post("/uploadfiles/")
