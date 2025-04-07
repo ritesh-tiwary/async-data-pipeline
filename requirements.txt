@@ -5,6 +5,7 @@ aiofiles
 aioodbc
 celery[redis]
 kombu
+pika
 beanie
 motor
 asyncpg
