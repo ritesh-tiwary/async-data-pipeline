@@ -3,12 +3,12 @@ import aiofiles
 from typing import List
 from fastapi import FastAPI, UploadFile, File
 
-from app.tasks.celery_task import CeleryTask
+from app.worker import celery
+from app.tasks.task import add_with_retry
 from celery.result import AsyncResult
 
 
 app = FastAPI()
-celery_task = CeleryTask()
 
 @app.get('/')
 def root():
@@ -62,12 +62,12 @@ async def upload_files(files: List[UploadFile] = File(...)):
 
 @app.get("/add/{x}/{y}")
 def add_numbers(x: int, y: int):
-    task = celery_task.delay. .add_with_retry(x, y)
+    task = add_with_retry.delay(x, y)
     return {"task_id": task.id}
 
 @app.get("/result/{task_id}")
 def get_result(task_id: str):
-    result = celery_task.AsyncResult(task_id)
+    result = AsyncResult(task_id, app=celery)
     if result.failed():
         return {"task_id": task_id, "status": "Failed"}
     elif result.ready():
