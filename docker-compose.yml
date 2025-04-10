@@ -7,8 +7,17 @@ services:
     restart: always
     ports:
       - "8000:8000"
+    networks:
+      - app_network
     depends_on:
       - celery_worker
+      - rabbitmq_broker
+      - redis_broker
+      - mongodb_backend
+    environment:
+      POSTGRES_CONFIG: '{"dbname":"tasks","user":"dbuser","password":"dbpassword","host":"postgres_db","port":"5432"}'
+      CELERY_BROKER_URL: "pyamqp://guest@rabbitmq_broker:5672//"
+      CELERY_RESULT_BACKEND: "mongodb://admin:secret@mongodb_backend:27017/celery_results"
 
   celery_worker:
     build:
@@ -16,14 +25,31 @@ services:
       dockerfile: docker/Celery.Dockerfile
     container_name: celery_worker
     restart: always
+    networks:
+      - app_network
     depends_on:
       - postgres_db
       - redis_broker
       - mongodb_backend
+      - rabbitmq_broker
     environment:
       POSTGRES_CONFIG: '{"dbname":"tasks","user":"dbuser","password":"dbpassword","host":"postgres_db","port":"5432"}'
-      CELERY_BROKER_URL: "redis://localhost:6379/0"
-      CELERY_RESULT_BACKEND: "mongodb://admin:secret@mongodb:27017/celery_results"
+      CELERY_BROKER_URL: "pyamqp://guest@rabbitmq_broker:5672//"
+      CELERY_RESULT_BACKEND: "mongodb://admin:secret@mongodb_backend:27017/celery_results"
+
+  flower_app:
+    build:
+      context: .
+      dockerfile: docker/Flower.Dockerfile
+    container_name: flower_app
+    restart: always
+    depends_on:
+      - redis_broker
+      - rabbitmq_broker
+    ports:
+      - "5555:5555"
+    networks:
+      - app_network
 
   rabbitmq_broker:
     build:
@@ -34,6 +60,8 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+    networks:
+      - app_network
     volumes:
       - rabbitmq_data:/data
 
@@ -45,6 +73,8 @@ services:
     restart: always
     ports:
       - "6379:6379"
+    networks:
+      - app_network
     volumes:
       - redis_data:/data
 
@@ -56,6 +86,8 @@ services:
     restart: always
     ports:
       - "27017:27017"
+    networks:
+      - app_network
     volumes:
       - mongo_data:/data/db
 
@@ -67,8 +99,14 @@ services:
     restart: always
     ports:
       - "5432:5432"
+    networks:
+      - app_network
     volumes:
       - postgres_data:/data/db
+
+networks:
+  app_network:
+    driver: bridge
 
 volumes:
   mongo_data:

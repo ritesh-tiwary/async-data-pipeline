@@ -9,7 +9,7 @@ class Logger:
 
     def get_logger(self):
         logging.basicConfig(level=logging.INFO,
-                            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                            format='%(asctime)s - %(levelname)s - %(name)s - %(message)s',
                             handlers=[self.stream_handler, self.time_rotating_file_handler])
 
         logger = logging.getLogger(self.logger_name)

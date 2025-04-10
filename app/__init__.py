@@ -65,7 +65,7 @@ def add_numbers(x: int, y: int):
     task = add_with_retry.delay(x, y)
     return {"task_id": task.id}
 
-@app.get("/result/{task_id}")
+@app.get("/results/{task_id}")
 def get_result(task_id: str):
     result = AsyncResult(task_id, app=celery)
     if result.failed():
