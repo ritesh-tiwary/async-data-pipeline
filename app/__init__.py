@@ -4,7 +4,7 @@ from typing import List
 from fastapi import FastAPI, UploadFile, File
 
 from app.worker import celery
-from app.tasks.task import add_with_retry
+from app.tasks.file_processor import add_with_retry
 from celery.result import AsyncResult
 
 
@@ -65,11 +65,11 @@ def add_numbers(x: int, y: int):
     task = add_with_retry.delay(x, y)
     return {"task_id": task.id}
 
-@app.get("/results/{task_id}")
+@app.get("/task/{task_id}")
 def get_result(task_id: str):
     result = AsyncResult(task_id, app=celery)
     if result.failed():
         return {"task_id": task_id, "status": "Failed"}
     elif result.ready():
         return {"task_id": task_id, "result": result.result}
-    return {"task_id": task_id, "status": "Pending"}
+    return {"task_id": task_id, "status": "Processing"}

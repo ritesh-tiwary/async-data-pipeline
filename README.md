@@ -17,23 +17,23 @@
 2. **Celery Producer**: Queues tasks for batch processing.
 3. **Celery Workers (Consumers)**: Process files asynchronously and insert data into PostgreSQL.
 4. **PostgreSQL Database**: Stores the processed data.
-5. **Redis (Broker)**: Handles message queueing.
+5. **RabbitMQ (Broker)**: Handles message queueing.
 6. **Mongodb (Backend)**: Store result message.
 7. **Flower Dashboard** (Optional): Monitors Celery tasks.
 8. **Email Notification** (Optional): Notify permanently failed Celery tasks.
 
 ```plaintext
 ┌──────────────┐      ┌──────────────┐      ┌──────────────┐      ┌──────────────┐      ┌──────────────┐      ┌────────────────┐      ┌────────────────┐
-│    Client    │ ---> │   FastAPI    │ ---> │    Redis     │ ---> │   Celery     │ ---> │  Mongo DB    │ ---> │ PostgreSQL DB  │ ---> │   S3 Glacier   │ 
+│    Client    │ ---> │   FastAPI    │ ---> │   RabbitMQ   │ ---> │   Celery     │ ---> │   MongoDB    │ ---> │ PostgreSQL DB  │ ---> │   S3 Glacier   │ 
 │   (Request)  │      │  (Producer)  │      │   (Queue)    │      │  (Workers)   │      │  (Backend)   │      │   (Storage)    │      │ (Cold Storage) │
 └──────────────┘      └──────────────┘      └──────────────┘      └──────────────┘      └──────────────┘      └────────────────┘      └────────────────┘      
 ```
 
 ## Installation
 ### Prerequisites
-- Python 3.9+
+- Python 3.12+
 - PostgreSQL
-- Redis (as Celery broker)
+- RabbitMQ (as Celery broker)
 - Mongodb (as Celery backend)
 - Docker & Docker Compose
 - Kubernetes (optional)
@@ -60,20 +60,20 @@ pip install -r requirements.txt
 ## Configuration
 Set environment variables:
 ```bash
-export CELERY_BROKER_URL="redis://localhost:6379/0"
-export CELERY_RESULT_BACKEND="mongodb://user:password@mongodb:27017/celery_backend"
+export CELERY_BROKER_URL="pyamqp://guest@localhost:5672//"
+export CELERY_RESULT_BACKEND="mongodb://user:password@localhost:27017/celery_results"
 ```
 
 Alternatively, create a `.env` file:
 ```
-CELERY_BROKER_URL="redis://localhost:6379/0"
-CELERY_RESULT_BACKEND="mongodb://user:password@mongodb:27017/celery_backend"
+CELERY_BROKER_URL="pyamqp://guest@localhost:5672//"
+CELERY_RESULT_BACKEND="mongodb://user:password@localhost:27017/celery_results"
 ```
 
 ## Running the Application
-Start Redis (if not running already):
+Start RabbitMQ (if not running already):
 ```bash
-redis-server
+rabbitmq-server
 ```
 
 Start the FastAPI application:

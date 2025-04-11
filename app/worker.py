@@ -12,6 +12,7 @@ celery = Celery(
     include=["app.tasks.task"],
 )
 celery.conf.update(task_track_started=True)
+celery.conf.task_routes = {'tasks.add': {'queue': 'task-queue'}}
 
 logger.info("Celery worker initialized")
 logger.info(f"Broker URL: {settings.CELERY_BROKER_URL}")

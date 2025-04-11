@@ -12,4 +12,4 @@ RUN pip install -r requirements.txt
 
 RUN adduser celery_worker
 
-CMD ["celery", "--app", "app.worker.celery", "worker", "--loglevel", "info", "--uid", "celery_worker", "--concurrency", "4", "--queues", "tasks_queue"]
+CMD ["celery", "--app", "app.worker.celery", "worker", "--loglevel", "info", "--uid", "celery_worker", "--concurrency", "4", "--queues", "task-queue"]
