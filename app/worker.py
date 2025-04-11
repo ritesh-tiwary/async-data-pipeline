@@ -9,10 +9,10 @@ celery = Celery(
     "tasks",
     broker=settings.CELERY_BROKER_URL,
     backend=settings.CELERY_RESULT_BACKEND,
-    include=["app.tasks.task"],
+    include=["app.tasks.file_tasks"]
 )
 celery.conf.update(task_track_started=True)
-celery.conf.task_routes = {'tasks.add': {'queue': 'task-queue'}}
+celery.conf.task_routes = {'app.tasks.file_tasks.add': {'queue': 'file-tasks-queue'}}
 
 logger.info("Celery worker initialized")
 logger.info(f"Broker URL: {settings.CELERY_BROKER_URL}")

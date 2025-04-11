@@ -4,7 +4,7 @@ from typing import List
 from fastapi import FastAPI, UploadFile, File
 
 from app.worker import celery
-from app.tasks.file_processor import add_with_retry
+from app.tasks.file_tasks import add_with_retry
 from celery.result import AsyncResult
 
 
