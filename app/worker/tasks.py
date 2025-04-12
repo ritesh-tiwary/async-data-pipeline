@@ -5,7 +5,7 @@ from celery.exceptions import MaxRetriesExceededError
 
 logger = Logger(__name__)
 
-@celery.task(bind=True, max_retries=3)
+@celery.task(name='app.worker.tasks.add', bind=True, max_retries=3)
 def add_with_retry(self, x, y):
     """
     Add two numbers together with retry logic and log the result.
