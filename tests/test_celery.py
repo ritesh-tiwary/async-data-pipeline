@@ -1,8 +1,18 @@
-from celery.result import AsyncResult
-from app.tasks.file_tasks import save_to_db
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-def test_celery_save_to_db():
-    task = save_to_db.delay(2, 3)
-    result = AsyncResult(task.id)
+from app.worker import celery
+from app.worker.tasks import add_with_retry
+from celery.result import AsyncResult
+
+
+def test_add():
+    task = add_with_retry.delay(2, 2)
+    result = AsyncResult(task.id, app=celery)
     result.get(timeout=10)
-    assert result.result == 5
+    assert result.result == 4
+
+
+if __name__ == '__main__':
+    test_add()

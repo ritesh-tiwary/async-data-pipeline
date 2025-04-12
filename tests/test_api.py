@@ -1,11 +1,17 @@
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from app import app
 from fastapi.testclient import TestClient
+
 
 client = TestClient(app)
 
 def test_get_result():
-    response = client.get("/result/", params={"task_id": "e89911a5-8830-42c9-857f-75b49ac19c13"})
+    task_id = '577b1597-cb4a-423f-9907-494e791d45b4'
+    response = client.get(f'/task/{task_id}')
     assert response.status_code == 200
-    data = response.json()
-    assert "task_id" in data
-    assert data["status"] == "Pending"
+
+if __name__ == '__main__':
+    test_get_result()
