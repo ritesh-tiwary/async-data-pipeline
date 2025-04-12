@@ -47,6 +47,8 @@ services:
       - "5555:5555"
     networks:
       - app_network
+    profiles:
+      - backend
 
   rabbitmq_broker:
     build:
@@ -61,6 +63,8 @@ services:
       - app_network
     volumes:
       - rabbitmq_data:/data
+    profiles:
+      - backend
 
   redis_broker:
     build:
@@ -89,6 +93,8 @@ services:
       - app_network
     volumes:
       - mongo_data:/data/db
+    profiles:
+      - backend
 
   postgres_db:
     build:
@@ -102,6 +108,8 @@ services:
       - app_network
     volumes:
       - postgres_data:/data/db
+    profiles:
+      - backend
 
 networks:
   app_network:
