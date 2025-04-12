@@ -12,7 +12,6 @@ services:
     depends_on:
       - celery_worker
       - rabbitmq_broker
-      - redis_broker
       - mongodb_backend
     environment:
       POSTGRES_CONFIG: '{"dbname":"tasks","user":"dbuser","password":"dbpassword","host":"postgres_db","port":"5432"}'
@@ -29,7 +28,6 @@ services:
       - app_network
     depends_on:
       - postgres_db
-      - redis_broker
       - mongodb_backend
       - rabbitmq_broker
     environment:
@@ -44,7 +42,6 @@ services:
     container_name: flower_app
     restart: always
     depends_on:
-      - redis_broker
       - rabbitmq_broker
     ports:
       - "5555:5555"
@@ -77,6 +74,8 @@ services:
       - app_network
     volumes:
       - redis_data:/data
+    profiles:
+      - ignore-me
 
   mongodb_backend:
     build:
