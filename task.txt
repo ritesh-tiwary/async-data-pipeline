@@ -1,1 +1,4 @@
-mongodb port issue -- docker logs mongodb_backend
+Commands:
+---------
+docker logs mongodb_backend
+docker ps --format "{{.Names}}"
