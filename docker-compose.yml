@@ -11,12 +11,12 @@ services:
       - app_network
     depends_on:
       - celery_worker
-      - rabbitmq_broker
-      - mongodb_backend
     environment:
       POSTGRES_CONFIG: '{"dbname":"tasks","user":"dbuser","password":"dbpassword","host":"postgres_db","port":"5432"}'
       CELERY_BROKER_URL: "pyamqp://guest@rabbitmq_broker:5672//"
       CELERY_RESULT_BACKEND: "mongodb://admin:secret@mongodb_backend:27017/celery_results"
+    profiles:
+      - app
 
   celery_worker:
     build:
@@ -26,14 +26,12 @@ services:
     restart: always
     networks:
       - app_network
-    depends_on:
-      - postgres_db
-      - mongodb_backend
-      - rabbitmq_broker
     environment:
       POSTGRES_CONFIG: '{"dbname":"tasks","user":"dbuser","password":"dbpassword","host":"postgres_db","port":"5432"}'
       CELERY_BROKER_URL: "pyamqp://guest@rabbitmq_broker:5672//"
       CELERY_RESULT_BACKEND: "mongodb://admin:secret@mongodb_backend:27017/celery_results"
+    profiles:
+      - app
 
   flower_app:
     build:
