@@ -36,7 +36,7 @@ async def consumer(file_queue: asyncio.Queue):
             file_queue.task_done()
             break
         filename, content = item
-        print(f"Saving file: {filename} ({len(content)} bytes) to database")
+        print(f"Pushing file: {filename} ({len(content)} bytes) to celery")
         save_data.delay(filename, content)
         file_queue.task_done()
 
