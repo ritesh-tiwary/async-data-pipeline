@@ -4,7 +4,7 @@ from typing import List
 from fastapi import FastAPI, UploadFile, File
 
 from app.worker import celery
-from app.worker.tasks import add_with_retry
+from app.worker.tasks import add_with_retry, save_data
 from celery.result import AsyncResult
 
 
@@ -18,6 +18,7 @@ def root():
 async def producer(files: List[UploadFile], file_queue: asyncio.Queue):
     try:
         for file in files:
+            print(f"Processing file: {file.filename}")
             async with aiofiles.open(file.filename, 'rb') as f:
                 content = await f.read()
             await file_queue.put((file.filename, content.decode('utf-8')))
@@ -35,7 +36,8 @@ async def consumer(file_queue: asyncio.Queue):
             file_queue.task_done()
             break
         filename, content = item
-        celery_task.save_to_db.delay(filename, content)
+        print(f"Saving file: {filename} ({len(content)} bytes) to database")
+        save_data.delay(filename, content)
         file_queue.task_done()
 
 @app.post("/uploadfiles/")

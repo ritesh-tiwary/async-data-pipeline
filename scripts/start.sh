@@ -1,10 +1,10 @@
-uvicorn app:app --host 0.0.0.0 --port 8000 &
+python -m uvicorn app:app --host 0.0.0.0 --port 8001 &
 FASTAPI_PID=$!
 
 echo "FastAPI started with PID $FASTAPI_PID"
 
 # Start Celery worker
-celery --app app.worker.celery worker --loglevel=info &
+python -m celery --app app.worker.celery worker --loglevel=info &
 CELERY_PID=$!
 
 echo "Celery worker started with PID $CELERY_PID"

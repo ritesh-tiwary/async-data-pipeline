@@ -13,5 +13,10 @@ def test_get_result():
     response = client.get(f'/task/{task_id}')
     assert response.status_code == 200
 
+def test_upload_files():
+    files = {'file': ('test_file.txt', 'This is a test file', 'text/plain')}
+    response = client.post('/upload', files=files)
+    assert response.status_code == 200
+
 if __name__ == '__main__':
     test_get_result()

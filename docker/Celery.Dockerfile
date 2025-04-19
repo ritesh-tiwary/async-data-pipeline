@@ -6,6 +6,8 @@ COPY ./app /worker/app
 
 COPY requirements.txt /worker/
 
+RUN mkdir -p /worker/uploads
+
 RUN pip install --upgrade pip
 
 RUN pip install -r requirements.txt
