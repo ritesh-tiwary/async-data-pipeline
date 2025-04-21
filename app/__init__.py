@@ -3,12 +3,15 @@ import aiofiles
 from typing import List
 from fastapi import FastAPI, UploadFile, File
 
+from app.api.v1.routers import storage_router
+
 from app.worker import celery
 from app.worker.tasks import add_with_retry, save_data
 from celery.result import AsyncResult
 
 
 app = FastAPI()
+app.include_router(storage_router.router, prefix="/api/v1")
 
 @app.get('/')
 def root():
