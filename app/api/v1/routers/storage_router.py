@@ -3,7 +3,6 @@ from typing import Annotated
 from functools import lru_cache
 from fastapi.responses import JSONResponse
 from fastapi import APIRouter, HTTPException, Depends, Header, Request, status
-from app.api.v1.models.storage_model import FileUploadHeaders
 from app.api.v1.services.storage_service import StorageService
 
 
