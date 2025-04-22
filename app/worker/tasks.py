@@ -17,6 +17,7 @@ def save_data(self, payload_dict: dict):
         with open(payload.filepath, 'rb') as f:
             content= f.read()
         logger.info(f"Processing file {payload.filename} ({len(content)} bytes) at {payload.filepath}")
+        return "Proccessed successfully"
     except Exception as e:
         logger.error(f"Error occurred: {e}")
         raise self.retry(exc=e, countdown=5)

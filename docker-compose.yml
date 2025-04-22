@@ -15,6 +15,9 @@ services:
       POSTGRES_CONFIG: '{"dbname":"tasks","user":"dbuser","password":"dbpassword","host":"postgres_db","port":"5432"}'
       CELERY_BROKER_URL: "pyamqp://guest@rabbitmq_broker:5672//"
       CELERY_RESULT_BACKEND: "mongodb://admin:secret@mongodb_backend:27017/celery_results"
+      STORAGE_DIR: "/app/uploads"
+    volumes:
+      - uploads:/app/uploads
     profiles:
       - app
 
@@ -30,6 +33,8 @@ services:
       POSTGRES_CONFIG: '{"dbname":"tasks","user":"dbuser","password":"dbpassword","host":"postgres_db","port":"5432"}'
       CELERY_BROKER_URL: "pyamqp://guest@rabbitmq_broker:5672//"
       CELERY_RESULT_BACKEND: "mongodb://admin:secret@mongodb_backend:27017/celery_results"
+    volumes:
+      - uploads:/app/uploads
     profiles:
       - app
 
@@ -118,3 +123,4 @@ volumes:
   redis_data:
   rabbitmq_data:
   postgres_data:
+  uploads:
