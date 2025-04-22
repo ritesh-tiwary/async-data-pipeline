@@ -7,9 +7,9 @@ class JSONParser(Parser):
         self.logger = Logger(__name__)
 
     def parse(self,  name: str, bytes_obj: bytes) -> bool:
-        self.logger.info(f'Parsing JSON file f{name} of f{len(bytes_obj)} bytes')
+        self.logger.info(f'Parsing JSON file {name} of {len(bytes_obj)} bytes')
         return True
 
     def load(self,  name: str, bytes_obj: bytes) -> bool:
-        self.logger.info(f'Loading JSON file f{name} of f{len(bytes_obj)} bytes')
+        self.logger.info(f'Loading JSON file {name} of {len(bytes_obj)} bytes')
         return True
