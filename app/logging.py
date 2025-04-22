@@ -2,23 +2,19 @@ import logging
 
 
 class Logger:
-    def __init__(self, name):
-        self.logger_name = name
-        self.stream_handler = logging.StreamHandler()
-        self.time_rotating_file_handler = logging.handlers.TimedRotatingFileHandler('app/logs/app.log', when='midnight', interval=1, backupCount=7)
+    def __init__(self, logger_name):
+        stream_formatter = logging.Formatter('%(levelname)s - %(name)s - %(message)s')
+        file_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(name)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+        stream_handler = logging.StreamHandler()
+        file_handler = logging.handlers.TimedRotatingFileHandler('app/logs/app.log', when='midnight', interval=1, backupCount=7, delay=True)
 
-    def get_logger(self):
-        logging.basicConfig(level=logging.INFO,
-                            format='%(asctime)s - %(levelname)s - %(name)s - %(message)s',
-                            handlers=[self.stream_handler, self.time_rotating_file_handler])
-
-        logger = logging.getLogger(self.logger_name)
-        return logger
+        stream_handler.setFormatter(stream_formatter)
+        file_handler.setFormatter(file_formatter)
+        logging.basicConfig(handlers=[stream_handler, file_handler], level=logging.INFO, encoding='utf-8')
+        self.logger = logging.getLogger(logger_name)
 
     def info(self, message):
-        logger = self.get_logger()
-        logger.info(message)
+        self.logger.info(message)
 
     def error(self, message):
-        logger = self.get_logger()
-        logger.error(message)
+        self.logger.error(message)
