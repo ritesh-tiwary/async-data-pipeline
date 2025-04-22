@@ -17,4 +17,5 @@ class Settings(BaseSettings):
     API_URL: str = Field("https://api.example.com", env="API_URL")
 
     # Other settings
+    STORAGE_DIR: str = Field("uploads", env="STORAGE_DIR")
     DEBUG: bool = Field(False, env="DEBUG")

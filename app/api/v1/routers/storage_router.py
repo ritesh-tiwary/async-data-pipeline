@@ -47,10 +47,8 @@ async def upload_file(request: Request,
                     status_code=status.HTTP_411_LENGTH_REQUIRED
                 )
 
-    fileobj.seek(0)
-    content = fileobj.read()
-    if storage_service.validate_checksum(x_checksum, content):
-        task_id = storage_service.upload_file(x_filename, content)
+    if storage_service.validate_checksum(x_checksum, fileobj):
+        task_id = storage_service.upload_file(x_filename, fileobj)
     else:
         return JSONResponse(
             content={"detail": f"Incorrect checksum - {x_checksum}"},

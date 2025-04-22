@@ -1,8 +1,10 @@
-from abc import ABC, abstractmethod
+from functools import lru_cache
+from app.settings import Settings
 
-class Base(ABC):
-    @abstractmethod
-    def parse(self, name: str, bytes_obj: bytes) -> bool:...
+class Base:
+    def __init__(self):
+        self.settings = self.get_settings()
 
-    @abstractmethod
-    def load(self,  name: str, bytes_obj: bytes) -> bool:...
+    @lru_cache()
+    def get_settings(self):
+        return Settings()

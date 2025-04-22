@@ -2,20 +2,21 @@ from os import path
 from app.worker import celery
 from app.logging import Logger
 from celery.exceptions import MaxRetriesExceededError
+from app.api.v1.models.storage_model import FileTaskPayload
 
 
 logger = Logger(__name__)
 
 @celery.task(name='app.worker.tasks.save', bind=True, max_retries=3)
-def save_data(self, filename: str, content: bytes):
+def save_data(self, payload_dict: dict):
     """
     Parse data
     """
     try:
-        upload_path = path.join('uploads', filename)
-        with open(upload_path, 'wb') as f:
-            f.write(content)
-        logger.info(f"File {upload_path} ({len(content)} bytes) saved successfully.")
+        payload = FileTaskPayload(**payload_dict)
+        with open(payload.filepath, 'rb') as f:
+            content= f.read()
+        logger.info(f"Processing file {payload.filename} ({len(content)} bytes) at {payload.filepath}")
     except Exception as e:
         logger.error(f"Error occurred: {e}")
         raise self.retry(exc=e, countdown=5)

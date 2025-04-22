@@ -2,23 +2,33 @@ import os
 import shutil
 import hashlib
 from io import BytesIO
-from typing import List
+from typing import List, BinaryIO
 from fastapi import HTTPException, UploadFile
+from app.core.base import Base
 from app.worker.tasks import save_data
+from app.api.v1.models.storage_model import FileTaskPayload
 
 
-class StorageService:
-    def __init__(self):...        
+class StorageService(Base):
+    def __init__(self):
+        super().__init__()
+        self.storage_dir = self.settings.STORAGE_DIR
 
-    def validate_checksum(self, checksum: str, content: bytes) -> bool:
+    def validate_checksum(self, checksum: str, fileobj: BinaryIO) -> bool:
         md5_hash = hashlib.md5()
-        md5_hash.update(content)
+        md5_hash.update(fileobj.getvalue())
 
         calculated_checksum = md5_hash.hexdigest()
         return calculated_checksum == checksum
     
-    def upload_file(self, filename: str, content: bytes) -> str:
-        task = save_data.delay(filename, content)
+    def upload_file(self, file_name: str, fileobj: BinaryIO) -> str:
+        file_path = os.path.join(self.storage_dir, file_name)
+        with open(file_path, 'wb') as f:
+            fileobj.seek(0)
+            shutil.copyfileobj(fileobj, f)
+
+        payload = FileTaskPayload(filename=file_name, filepath=file_path, info={"source": "api"})
+        task = save_data.delay(payload.dict())
         return task.id
 
     def delete_file(self, file_name: str, sub_dir: str = "") -> None:
