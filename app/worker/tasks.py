@@ -1,6 +1,7 @@
 from os import path
 from app.worker import celery
 from app.logging import Logger
+from app.core.parser import get_parser
 from celery.exceptions import MaxRetriesExceededError
 from app.api.v1.models.storage_model import FileTaskPayload
 
@@ -23,12 +24,21 @@ def save_data(self, payload_dict: dict):
         raise self.retry(exc=e, countdown=5)
 
 @celery.task(name='app.worker.tasks.parse', bind=True, max_retries=3)
-def parse_data(self, bytes_obj: bytes):
+def parse_data(self, payload_dict: dict):
     """
     Parse data
     """
     try:
-        logger.info(len(bytes_obj))
+        payload = FileTaskPayload(**payload_dict)
+        with open(payload.filepath, 'rb') as f:
+            content= f.read()
+        logger.info(f"Processing file {payload.filename} ({len(content)} bytes) at {payload.filepath}")
+        
+        parser = get_parser(payload.filename)
+        if parser.parse(payload.filename, content):
+            return "Parsed successfully"
+        else:
+            return "Parsing failed"
     except Exception as e:
         logger.error(f"Error occurred: {e}")
         raise self.retry(exc=e, countdown=5)

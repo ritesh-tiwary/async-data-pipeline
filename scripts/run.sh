@@ -7,7 +7,7 @@ curl -X 'POST' \
   -F 'files=@file2.txt'
 END_COMMENT
 
-FILENAME="file1.txt"
+FILENAME="test.json"
 CHECKSUM=$(md5sum $FILENAME); CHECKSUM="${CHECKSUM%% *}"
 curl -X POST "http://localhost:8000/api/v1/storage/upload" \
   -H "X-Checksum: $CHECKSUM" \

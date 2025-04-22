@@ -5,7 +5,7 @@ from io import BytesIO
 from typing import List, BinaryIO
 from fastapi import HTTPException, UploadFile
 from app.core.base import Base
-from app.worker.tasks import save_data
+from app.worker.tasks import parse_data
 from app.api.v1.models.storage_model import FileTaskPayload
 
 
@@ -28,7 +28,7 @@ class StorageService(Base):
             shutil.copyfileobj(fileobj, f)
 
         payload = FileTaskPayload(filename=file_name, filepath=file_path, info={"source": "api"})
-        task = save_data.delay(payload.dict())
+        task = parse_data.delay(payload.dict())
         return task.id
 
     def delete_file(self, file_name: str, sub_dir: str = "") -> None:

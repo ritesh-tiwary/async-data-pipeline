@@ -1,8 +1,8 @@
 from app.logging import Logger
-from app.core.base import Base
+from app.core.parser import Parser
 
 
-class JSONParser(Base):
+class JSONParser(Parser):
     def __init__(self):
         self.logger = Logger(__name__)
 
