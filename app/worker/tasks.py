@@ -2,7 +2,6 @@ from os import path
 from app.worker import celery
 from app.logging import Logger
 from app.core.parser import get_parser
-from celery.exceptions import MaxRetriesExceededError
 from app.api.v1.models.storage_model import FileTaskPayload
 
 
@@ -32,11 +31,11 @@ def parse_data(self, payload_dict: dict):
         payload = FileTaskPayload(**payload_dict)
         with open(payload.filepath, 'rb') as f:
             content= f.read()
-        logger.info(f"Processing file {payload.filename} ({len(content)} bytes) at {payload.filepath}")
-        
+        logger.info(f"Processing file {payload.filename} at {payload.filepath}")        
         parser = get_parser(payload.filename)
-        if parser.parse(payload.filename, content):
-            return "Parsed successfully"
+        parsed_file = parser.parse(payload.filepath)
+        if parsed_file:
+            return 'Parsed successfully'
         else:
             return "Parsing failed"
     except Exception as e:
@@ -44,7 +43,7 @@ def parse_data(self, payload_dict: dict):
         raise self.retry(exc=e, countdown=5)
 
 @celery.task(name='app.worker.tasks.load', bind=True, max_retries=3)
-def load_data(self, payload_dict: dict):
+def load_data(self, filepath: str, payload_dict: dict):
     """
     Load data
     """
@@ -57,18 +56,11 @@ def load_data(self, payload_dict: dict):
             mapping= f.read()
         logger.info(f"Mapping file {mapping_name} ({len(mapping)} bytes) at {mapping_path}")
 
-        with open(payload.filepath, 'rb') as f:
-            content= f.read()
-        logger.info(f"Loading file {payload.filename} ({len(content)} bytes) at {payload.filepath}")
-
         parser = get_parser(payload.filename)
-        if parser.load(payload.filename, content, mapping_name, mapping):
+        if parser.load(filepath, mapping_name, mapping):
             return "Loaded successfully"
         else:
             return "Loading failed"
-    except MaxRetriesExceededError:
-        logger.error(f"Max retries exceeded for file {payload.filename}.")
-        raise
     except Exception as e:
         logger.error(f"Error occurred: {e}")
         raise self.retry(exc=e, countdown=5)  # Retry after 5 seconds

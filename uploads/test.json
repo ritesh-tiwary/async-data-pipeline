@@ -1,0 +1,33 @@
+[
+    {
+      "user": {
+        "id": "u123",
+        "name": "Alice Johnson",
+        "details": {
+          "age": 30,
+          "location": "New York"
+        }
+      }
+    },
+    {
+      "user": {
+        "id": "u456",
+        "name": "Bob Singh",
+        "details": {
+          "age": 42,
+          "location": "San Francisco"
+        }
+      }
+    },
+    {
+      "user": {
+        "id": "u789",
+        "name": "Charlie Zhang",
+        "details": {
+          "age": 27,
+          "location": "Chicago"
+        }
+      }
+    }
+  ]
+  
