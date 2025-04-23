@@ -50,8 +50,8 @@ def load_data(self, payload_dict: dict):
     """
     try:
         payload = FileTaskPayload(**payload_dict)
-        mapping_name = path.basename(payload.info["mapping"])
-        mapping_path = payload.info["mapping"]
+        mapping_name = payload.info["mapping"]
+        mapping_path = path.join("app/mapping", payload.info["mapping"])
 
         with open(mapping_path, 'rb') as f:
             mapping= f.read()
@@ -66,8 +66,6 @@ def load_data(self, payload_dict: dict):
             return "Loaded successfully"
         else:
             return "Loading failed"
-        # task = Task(task_id=add_with_retry.request.id, status="completed", result=result)
-        # await task.insert()
     except MaxRetriesExceededError:
         logger.error(f"Max retries exceeded for file {payload.filename}.")
         raise

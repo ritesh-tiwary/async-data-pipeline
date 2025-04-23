@@ -27,9 +27,9 @@ class StorageService(Base):
             fileobj.seek(0)
             shutil.copyfileobj(fileobj, f)
 
-        payload = FileTaskPayload(filename=file_name, filepath=file_path, info={"mapping": "mapping/mapping_tablename_jsonfilename.csv", "source": "api"})
-        chain_task = chain(parse_data.s(payload.dict()), load_data.s(payload.dict())).delay()
-        return chain_task.id
+        payload = FileTaskPayload(filename=file_name, filepath=file_path, info={"mapping": "mapping_tablename_jsonfilename.csv", "source": "api"})
+        task = chain(parse_data.s(payload.dict()) | load_data.si(payload.dict())).delay()
+        return task.id
 
     def delete_file(self, file_name: str, sub_dir: str = "") -> None:
         try:
