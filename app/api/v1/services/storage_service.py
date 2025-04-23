@@ -1,11 +1,11 @@
 import os
 import shutil
 import hashlib
-from io import BytesIO
+from celery import chain
 from typing import List, BinaryIO
 from fastapi import HTTPException, UploadFile
 from app.core.base import Base
-from app.worker.tasks import parse_data
+from app.worker.tasks import parse_data, load_data
 from app.api.v1.models.storage_model import FileTaskPayload
 
 
@@ -27,9 +27,9 @@ class StorageService(Base):
             fileobj.seek(0)
             shutil.copyfileobj(fileobj, f)
 
-        payload = FileTaskPayload(filename=file_name, filepath=file_path, info={"source": "api"})
-        task = parse_data.delay(payload.dict())
-        return task.id
+        payload = FileTaskPayload(filename=file_name, filepath=file_path, info={"mapping": "mapping/mapping_tablename_jsonfilename.csv", "source": "api"})
+        chain_task = chain(parse_data.s(payload.dict()), load_data.s(payload.dict())).delay()
+        return chain_task.id
 
     def delete_file(self, file_name: str, sub_dir: str = "") -> None:
         try:
