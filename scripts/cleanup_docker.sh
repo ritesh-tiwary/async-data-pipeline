@@ -12,8 +12,8 @@ docker rmi $(docker images -q) -f
 echo "Removing dangling images..."
 docker image prune -a -f
 
-echo "Removing all volumes..."
-docker volume rm $(docker volume ls -q)
+# echo "Removing all volumes..."
+# docker volume rm $(docker volume ls -q)
 
 # echo "Removing all networks..."
 # docker network rm $(docker network ls -q)
