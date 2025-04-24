@@ -1,8 +1,7 @@
-import io
 import re
 import orjson
 import duckdb
-from typing import List, Tuple
+from typing import List
 from app.logging import Logger
 from app.core.parser import Parser
 
@@ -38,10 +37,10 @@ class JSONParser(Parser):
             try:
                 # Attempt to load the JSON data
                 with open(filepath, 'rb') as f:
-                    self.raw_data = orjson.loads(f)
+                    self.raw_data = orjson.loads(f.read())
             except orjson.JSONDecodeError:
                 try:
-                    self.logger.warning(f'Failed to load JSON file {filepath}, attempting repairs')
+                    self.logger.info(f'Failed to load JSON file {filepath}, attempting repairs')
                     # Apply common JSON repairs
                     repairs = [
                         (r',(\s*[}\]])', r'\1'),                                    # Remove trailing commas
@@ -69,27 +68,31 @@ class JSONParser(Parser):
                     return False
         except Exception as e:
             self.logger.error(f'Error validating JSON file {filepath}: {e}')
+            return False
         return True
 
     def parse(self, filepath: str) -> bool:
         if self.validate(filepath):
-            parsed_json = filepath.replace('.json', '_parsed.json')
-            with open(parsed_json, 'wb') as f:
+            parsed_json_filepath = filepath.replace('.json', '_parsed.json')
+            self.logger.info(f'Writing validated JSON file at {parsed_json_filepath}')
+            with open(parsed_json_filepath, 'wb') as f:
                 f.write(orjson.dumps(self.raw_data))
-            return parsed_json
+            return parsed_json_filepath
         else:
-            self.logger.error(f'Failed to parse JSON file {name}')
+            self.logger.error(f'Failed to parse JSON file {filepath}')
             return False
 
-    def load(self, filepath: str, mapping_name: str, mapping_obj: bytes) -> bool:
-        self.logger.info(f'Loading JSON file from {filepath}')        
-        mapping_df = duckdb.read_csv(io.BytesIO(mapping_obj), encoding='utf-8').to_df()        
-        table_name = mapping_name.split('_')[1]
+    def load(self, filepath: str, mapping_name: str, mapping_path: str) -> bool:
+        self.logger.info(f"Loding mapping file {mapping_name} from {mapping_path}")
+        mapping_df = duckdb.read_csv(mapping_path, encoding='utf-8').to_df()
+        table_name = mapping_name.split('-')[1]
         columns_name = mapping_df['db_column'].tolist()
-        
+
+        self.logger.info(f'Loading JSON file from {filepath}')
         select_query = self.generate_duckdb_select_query(mapping_df, filepath)
         insert_query = self.generate_database_insert_query(table_name, columns_name)
         rows = duckdb.sql(select_query).fetchall()
-        
-        self.logger.info(f'Inserting {len(rows)} rows into {table_name} with query: {insert_query}')
-        return True
+        row_count = len(rows)
+
+        self.logger.info(f'Inserting {row_count} rows into {table_name} with query: {insert_query}')
+        return row_count

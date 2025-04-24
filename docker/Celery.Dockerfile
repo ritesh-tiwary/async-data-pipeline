@@ -12,4 +12,4 @@ RUN pip install -r requirements.txt
 
 RUN adduser appuser
 
-CMD ["celery", "--app", "app.worker.celery", "worker", "--loglevel", "info", "--uid", "appuser", "--concurrency", "4", "--queues", "tasks-queue"]
+CMD ["celery", "--app", "app.worker.celery", "worker", "--loglevel", "info", "--concurrency", "4", "--queues", "tasks-queue"]

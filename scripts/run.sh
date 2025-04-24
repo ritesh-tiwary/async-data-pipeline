@@ -8,8 +8,10 @@ curl -X 'POST' \
 END_COMMENT
 
 FILENAME="test.json"
+MAPPING="mapping-tbl_users-jsonfilename.csv"
 CHECKSUM=$(md5sum $FILENAME); CHECKSUM="${CHECKSUM%% *}"
 curl -X POST "http://localhost:8000/api/v1/storage/upload" \
   -H "X-Checksum: $CHECKSUM" \
   -H "X-Filename: $FILENAME" \
+  -H "X-Mapping: $MAPPING" \
   --data-binary "@$FILENAME"

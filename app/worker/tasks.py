@@ -31,11 +31,11 @@ def parse_data(self, payload_dict: dict):
         payload = FileTaskPayload(**payload_dict)
         with open(payload.filepath, 'rb') as f:
             content= f.read()
-        logger.info(f"Processing file {payload.filename} at {payload.filepath}")        
+        logger.info(f"Processing file {payload.filename} at {payload.filepath}")
         parser = get_parser(payload.filename)
         parsed_file = parser.parse(payload.filepath)
-        if parsed_file:
-            return 'Parsed successfully'
+        if bool(parsed_file):
+            return parsed_file
         else:
             return "Parsing failed"
     except Exception as e:
@@ -52,13 +52,10 @@ def load_data(self, filepath: str, payload_dict: dict):
         mapping_name = payload.info["mapping"]
         mapping_path = path.join("app/mapping", payload.info["mapping"])
 
-        with open(mapping_path, 'rb') as f:
-            mapping= f.read()
-        logger.info(f"Mapping file {mapping_name} ({len(mapping)} bytes) at {mapping_path}")
-
         parser = get_parser(payload.filename)
-        if parser.load(filepath, mapping_name, mapping):
-            return "Loaded successfully"
+        row_count = parser.load(filepath, mapping_name, mapping_path)
+        if bool(row_count):
+            return f"{row_count} rows loaded successfully"
         else:
             return "Loading failed"
     except Exception as e:

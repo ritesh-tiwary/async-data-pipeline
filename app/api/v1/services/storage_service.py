@@ -3,7 +3,7 @@ import shutil
 import hashlib
 from celery import chain
 from typing import List, BinaryIO
-from fastapi import HTTPException, UploadFile
+from fastapi import HTTPException
 from app.core.base import Base
 from app.worker.tasks import parse_data, load_data
 from app.api.v1.models.storage_model import FileTaskPayload
@@ -21,13 +21,13 @@ class StorageService(Base):
         calculated_checksum = md5_hash.hexdigest()
         return calculated_checksum == checksum
     
-    def upload_file(self, file_name: str, fileobj: BinaryIO) -> str:
+    def upload_file(self, mapping: str, file_name: str, fileobj: BinaryIO) -> str:
         file_path = os.path.join(self.storage_dir, file_name)
         with open(file_path, 'wb') as f:
             fileobj.seek(0)
             shutil.copyfileobj(fileobj, f)
 
-        payload = FileTaskPayload(filename=file_name, filepath=file_path, info={"mapping": "mapping_tablename_jsonfilename.csv", "source": "api"})
+        payload = FileTaskPayload(filename=file_name, filepath=file_path, info={"mapping": mapping, "source": "api"})
         task = chain(parse_data.s(payload.dict()), load_data.s(payload.dict())).delay()
         return task.id
 

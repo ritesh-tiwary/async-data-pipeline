@@ -28,6 +28,7 @@ async def read_storage_items():
 
 @router.post("/upload")
 async def upload_file(request: Request,
+                      x_mapping: Annotated[str, Header()],
                       x_checksum: Annotated[str, Header()],
                       x_filename: Annotated[str, Header()],
                       storage_service: Annotated[StorageService, Depends(get_storage_service)]):
@@ -48,7 +49,7 @@ async def upload_file(request: Request,
                 )
 
     if storage_service.validate_checksum(x_checksum, fileobj):
-        task_id = storage_service.upload_file(x_filename, fileobj)
+        task_id = storage_service.upload_file(x_mapping, x_filename, fileobj)
     else:
         return JSONResponse(
             content={"detail": f"Incorrect checksum - {x_checksum}"},
