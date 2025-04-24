@@ -21,13 +21,13 @@ class StorageService(Base):
         calculated_checksum = md5_hash.hexdigest()
         return calculated_checksum == checksum
     
-    def upload_file(self, mapping: str, file_name: str, fileobj: BinaryIO) -> str:
+    def upload_file(self, mapping: str, file_name: str, fileobj: BinaryIO, source: str = 'api') -> str:
         file_path = os.path.join(self.storage_dir, file_name)
         with open(file_path, 'wb') as f:
             fileobj.seek(0)
             shutil.copyfileobj(fileobj, f)
 
-        payload = FileTaskPayload(filename=file_name, filepath=file_path, info={"mapping": mapping, "source": "api"})
+        payload = FileTaskPayload(filename=file_name, filepath=file_path, info={'mapping': mapping, 'source': source})
         task = chain(parse_data.s(payload.dict()), load_data.s(payload.dict())).delay()
         return task.id
 

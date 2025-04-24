@@ -19,12 +19,13 @@ def get_storage_service() -> StorageService:
     """
     return StorageService()
 
-@router.get("/")
-async def read_storage_items():
+@router.get("/list")
+async def read_storage_items(storage_service: Annotated[StorageService, Depends(get_storage_service)]):
     """
     Endpoint to retrieve all storage items.
     """
-    return {"message": "List of storage items"}
+    list_files = storage_service.list_files()
+    return {"List of storage items": list_files}
 
 @router.post("/upload")
 async def upload_file(request: Request,
@@ -57,9 +58,10 @@ async def upload_file(request: Request,
         )
     return {"FileName": x_filename, "Message": f"Upload complete. The file is now in the processing queue.Task Id: {task_id}"}
 
-@router.delete("/{item_id}")
-async def delete_storage_item(item_id: int):
+@router.delete("/{file_name}")
+async def delete_storage_item(file_name: str, storage_service: Annotated[StorageService, Depends(get_storage_service)]):
     """
     Endpoint to delete a storage item by ID.
     """
-    return {"message": f"Storage item with ID {item_id} deleted"}
+    storage_service.delete_file(file_name)
+    return {"message": f"{file_name} deleted"}

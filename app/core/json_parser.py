@@ -71,7 +71,7 @@ class JSONParser(Parser):
             return False
         return True
 
-    def parse(self, filepath: str) -> bool:
+    def parse(self, filepath: str) -> str:
         if self.validate(filepath):
             parsed_json_filepath = filepath.replace('.json', '_parsed.json')
             self.logger.info(f'Writing validated JSON file at {parsed_json_filepath}')
@@ -82,7 +82,7 @@ class JSONParser(Parser):
             self.logger.error(f'Failed to parse JSON file {filepath}')
             return False
 
-    def load(self, filepath: str, mapping_name: str, mapping_path: str) -> bool:
+    def load(self, filepath: str, mapping_name: str, mapping_path: str) -> int:
         self.logger.info(f"Loding mapping file from {mapping_path}")
         mapping_df = duckdb.read_csv(mapping_path, encoding='utf-8').to_df()
         table_name = mapping_name.split('-')[1]
