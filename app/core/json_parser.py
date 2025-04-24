@@ -83,7 +83,7 @@ class JSONParser(Parser):
             return False
 
     def load(self, filepath: str, mapping_name: str, mapping_path: str) -> bool:
-        self.logger.info(f"Loding mapping file {mapping_name} from {mapping_path}")
+        self.logger.info(f"Loding mapping file from {mapping_path}")
         mapping_df = duckdb.read_csv(mapping_path, encoding='utf-8').to_df()
         table_name = mapping_name.split('-')[1]
         columns_name = mapping_df['db_column'].tolist()
