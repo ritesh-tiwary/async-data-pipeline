@@ -2,11 +2,10 @@ import asyncio
 import aiofiles
 from typing import List
 from fastapi import FastAPI, UploadFile, File
-
 from app.api.v1.routers import storage_router
 
 from app.worker import celery
-from app.worker.tasks import add_with_retry, save_data
+from app.worker.tasks import add_with_retry
 from celery.result import AsyncResult
 
 
@@ -24,13 +23,13 @@ async def producer(files: List[UploadFile], file_queue: asyncio.Queue):
             print(f"Processing file: {file.filename}")
             async with aiofiles.open(file.filename, 'rb') as f:
                 content = await f.read()
-            await file_queue.put((file.filename, content.decode('utf-8')))
+            await file_queue.put((file.filename, content))
     finally:
         # Put sentinel values to signal the consumers to exit
         for _ in range(len(files)):
             await file_queue.put(None)
 
-# Consumer function to save data to the database
+# Consumer function to save data to the file
 async def consumer(file_queue: asyncio.Queue):
     while True:
         item = await file_queue.get()
@@ -38,9 +37,12 @@ async def consumer(file_queue: asyncio.Queue):
             # Sentinel value received, exit the consumer
             file_queue.task_done()
             break
+
         filename, content = item
-        print(f"Pushing file: {filename} ({len(content)} bytes) to celery")
-        save_data.delay(filename, content)
+        upload_path = f"app/upload/{filename}"
+        with open(upload_path, "w") as f:
+            f.write(content)
+        print(f"Created file: {filename} ({len(content)} bytes) at {upload_path}")
         file_queue.task_done()
 
 @app.post("/uploadfiles/")
