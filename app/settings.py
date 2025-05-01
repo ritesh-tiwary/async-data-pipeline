@@ -6,7 +6,7 @@ load_dotenv()
 
 class Settings(BaseSettings):
     # Database settings    
-    POSTGRES_CONFIG: dict = Field({"dbname":"tasks","user":"dbuser","password":"dbpassword","host":"postgres_db","port":"5432"}, env="POSTGRES_CONFIG")
+    POSTGRES_CONFIG: dict = Field({"database":"tasks","user":"dbuser","password":"dbpassword","host":"postgres_db","port":"5432", "min_size": 5,"max_size": 20}, env="POSTGRES_CONFIG")
 
     # Celery settings
     CELERY_BROKER_URL: str = Field("pyamqp://guest@localhost:5672//", env="CELERY_BROKER_URL")

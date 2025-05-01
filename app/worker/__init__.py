@@ -12,7 +12,7 @@ celery = Celery(
     include=["app.worker.tasks"]
 )
 celery.conf.update(task_track_started=True)
-task_names = ['add', 'save', 'load', 'parse']
+task_names = ['add', 'parse', 'load']
 celery.conf.task_routes = {f'app.worker.tasks.{task}': {'queue': 'tasks-queue'} for task in task_names}
 
 logger.info("Celery worker initialized")

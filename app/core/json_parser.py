@@ -1,8 +1,10 @@
 import re
 import orjson
 import duckdb
+import asyncio
 from typing import List
 from app.logging import Logger
+from app.database import Databse
 from app.core.parser import Parser
 
 
@@ -10,6 +12,7 @@ class JSONParser(Parser):
     def __init__(self):
         self.logger = Logger(__name__)
         self.raw_data = None
+        self.db = Databse()
 
     def generate_duckdb_select_query(self, mapping_df, json_path, table_alias='j') -> str:
         """ Generate a DuckDB query to extract JSON fields based on the provided mapping. """        
@@ -92,6 +95,7 @@ class JSONParser(Parser):
         select_query = self.generate_duckdb_select_query(mapping_df, filepath)
         insert_query = self.generate_database_insert_query(table_name, columns_name)
         rows = duckdb.sql(select_query).fetchall()
+        asyncio.run(self.db.insert(insert_query, rows))
         row_count = len(rows)
 
         self.logger.info(f'Inserting {row_count} rows into {table_name} with query: {insert_query}')

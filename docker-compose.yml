@@ -12,7 +12,7 @@ services:
     depends_on:
       - celery_worker
     environment:
-      POSTGRES_CONFIG: '{"dbname":"tasks","user":"dbuser","password":"dbpassword","host":"postgres_db","port":"5432"}'
+      POSTGRES_CONFIG: '{"database":"tasks","user":"dbuser","password":"dbpassword","host":"postgres_db","port":"5432", "min_size": 5,"max_size": 20}'
       CELERY_BROKER_URL: "pyamqp://guest@rabbitmq_broker:5672//"
       CELERY_RESULT_BACKEND: "mongodb://admin:secret@mongodb_backend:27017/celery_results"
       STORAGE_DIR: "/app/uploads"
@@ -30,11 +30,12 @@ services:
     networks:
       - app_network
     environment:
-      POSTGRES_CONFIG: '{"dbname":"tasks","user":"dbuser","password":"dbpassword","host":"postgres_db","port":"5432"}'
+      POSTGRES_CONFIG: '{"database":"tasks","user":"dbuser","password":"dbpassword","host":"postgres_db","port":"5432", "min_size": 5,"max_size": 20}'
       CELERY_BROKER_URL: "pyamqp://guest@rabbitmq_broker:5672//"
       CELERY_RESULT_BACKEND: "mongodb://admin:secret@mongodb_backend:27017/celery_results"
     volumes:
       - uploads:/app/uploads
+    user: "1001:1001"
     profiles:
       - app
 

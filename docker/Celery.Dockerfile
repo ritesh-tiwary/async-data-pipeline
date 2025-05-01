@@ -10,6 +10,8 @@ RUN pip install --upgrade pip
 
 RUN pip install -r requirements.txt
 
-RUN adduser appuser
+RUN addgroup --gid 1001 appuser
 
-CMD ["celery", "--app", "app.worker.celery", "worker", "--loglevel", "info", "--concurrency", "4", "--queues", "tasks-queue"]
+RUN adduser --uid 1001 --gid 1001 appuser
+
+CMD ["celery", "--app", "app.worker.celery", "worker", "--loglevel", "info", "--uid", "appuser", "--concurrency", "4", "--queues", "tasks-queue"]
