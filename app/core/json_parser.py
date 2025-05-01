@@ -4,8 +4,8 @@ import duckdb
 import asyncio
 from typing import List
 from app.logging import Logger
-from app.database import Databse
 from app.core.parser import Parser
+from app.core.database import Databse
 
 
 class JSONParser(Parser):
