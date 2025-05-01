@@ -35,7 +35,6 @@ services:
       CELERY_RESULT_BACKEND: "mongodb://admin:secret@mongodb_backend:27017/celery_results"
     volumes:
       - uploads:/app/uploads
-    user: "1001:1001"
     profiles:
       - app
 
