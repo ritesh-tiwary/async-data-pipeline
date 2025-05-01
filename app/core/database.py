@@ -22,8 +22,7 @@ class Databse(Base):
     async def send_to_dlq(self, connection, query, record, error_message):
         """Inserts failed record into the DLQ table in Postgres."""
         try:
-            await connection.execute("INSERT INTO failed_inserts (query, record, error_message) VALUES ($1, $2, $3)", 
-                                (query, record, error_message))
+            await connection.execute("INSERT INTO failed_inserts (query, record, error_message) VALUES ($1, $2, $3)", (query, record, error_message))
             self.logger.info(f"Sent to DLQ: {record} - Error: {error_message}")
         except Exception as e:
             self.logger.error(f"Failed to insert into DLQ: {record} - Error: {e}")
