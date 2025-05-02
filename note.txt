@@ -2,6 +2,7 @@ Commands:
 ---------
 docker logs mongodb_backend
 docker ps --format "{{.Names}}"
+docker system prune -a --volumes -f
 
 docker rm -f celery_worker
 docker build --no-cache --tag celery_worker --file docker/Celery.Dockerfile .
