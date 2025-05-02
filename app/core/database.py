@@ -12,7 +12,7 @@ class Database(Base):
 
     async def save_dlq_to_file(self, query, record, error):
         """Saves failed records to a JSON file as a backup."""
-        failed_record = {"query": query.strip(), "record": record, "error": error}
+        failed_record = {"query": query, "record": record, "error": error}
         try:
             with open(self.DLQ_FILE, "a") as f:
                 f.write(orjson.dumps(failed_record).decode("utf-8") + ",")
@@ -43,7 +43,7 @@ class Database(Base):
 
         self.logger.error(f"Consumer-{consumer_id} failed to insert Batch-{batch_id} after {retries} attempts")
         for record in batch:
-            await self.send_to_dlq(connection, query, str(record), ex)
+            await self.send_to_dlq(connection, query.strip(), str(record), ex)
 
     async def consumer(self, queue, pool, query, consumer_id, batch_size):
         """Consumes producer data from the queue and inserts it into Postgres with DLQ handling."""
