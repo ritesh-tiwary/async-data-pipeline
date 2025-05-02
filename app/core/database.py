@@ -4,7 +4,7 @@ import orjson
 from app.core.base import Base
 
 
-class Databse(Base):
+class Database(Base):
     def __init__(self):
         super().__init__()
         self.pool = None

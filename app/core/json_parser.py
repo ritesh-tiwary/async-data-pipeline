@@ -5,14 +5,14 @@ import asyncio
 from typing import List
 from app.logging import Logger
 from app.core.parser import Parser
-from app.core.database import Databse
+from app.core.database import Database
 
 
 class JSONParser(Parser):
     def __init__(self):
         self.logger = Logger(__name__)
         self.raw_data = None
-        self.db = Databse()
+        self.db = Database()
 
     def generate_duckdb_select_query(self, mapping_df, json_path, table_alias='j') -> str:
         """ Generate a DuckDB query to extract JSON fields based on the provided mapping. """        
