@@ -6,7 +6,7 @@ from app.core.base import Base
 
 class Database(Base):
     def __init__(self):
-        super().__init__()
+        super().__init__(name = __name__)
         self.pool = None
         self.DLQ_FILE = "app/logs/failed_inserts.json"  # Optional: Store failed records in a JSON file
 
