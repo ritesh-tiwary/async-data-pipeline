@@ -1,6 +1,5 @@
 import os
 import asyncio
-import aiofiles
 from typing import List
 from fastapi import FastAPI, UploadFile, File
 from app.settings import Settings
@@ -39,8 +38,7 @@ async def producer(files: List[UploadFile], file_queue: asyncio.Queue):
     try:
         for file in files:
             print(f"Processing file: {file.filename}")
-            async with aiofiles.open(file.filename, 'rb') as f:
-                content = await f.read()
+            content = await file.read()
             await file_queue.put((file.filename, content))
     finally:
         # Put sentinel values to signal the consumers to exit
