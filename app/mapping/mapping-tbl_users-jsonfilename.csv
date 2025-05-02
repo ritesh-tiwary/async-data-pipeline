@@ -1,5 +1,5 @@
 db_column,column_name,json_path,duckdb_type
 user_id,user_id,$.user.id,string
-full_name,name,$.user.name,string
-age,age,$.user.details.age,int
-city,location,$.user.details.location,string
+user_name,name,$.user.name,string
+user_age,age,$.user.details.age,int
+user_location,location,$.user.details.location,string
