@@ -8,6 +8,27 @@ async def connect_db():
     DB_HOST = "localhost"
     DB_PORT = "5432"
 
+    CREATE_TABLE = """
+    CREATE TABLE tbl_users (
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id TEXT NOT NULL UNIQUE,
+    user_name TEXT NOT NULL,
+    user_age INT,
+    user_location TEXT
+    );
+    CREATE TABLE tbl_failed_inserts (
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    failed_inserts_query TEXT NOT NULL,
+    failed_inserts_record TEXT NOT NULL,
+    failed_inserts_error TEXT NOT NULL
+    );
+    """
+
+    DROP_TABLE = """
+    DROP TABLE IF EXISTS tbl_users;
+    DROP TABLE IF EXISTS tbl_failed_inserts;
+    """
+
     try:
         conn = await asyncpg.connect(
             database=DB_NAME,
@@ -18,6 +39,7 @@ async def connect_db():
         )
 
         # Execute a test query
+        # await conn.execute(CREATE_TABLE)
         version = await conn.fetchval("SELECT version();")
         print("PostgreSQL Version:", version)
 

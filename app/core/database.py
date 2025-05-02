@@ -9,9 +9,9 @@ class Databse(Base):
         super().__init__()
         self.DLQ_FILE = "app/logs/failed_inserts.json"  # Optional: Store failed records in a JSON file
 
-    async def save_dlq_to_file(self, query, record, error_message):
+    async def save_dlq_to_file(self, query, record, error):
         """Saves failed records to a JSON file as a backup."""
-        failed_record = {"query": query.strip(), "record": record, "error": error_message}
+        failed_record = {"query": query.strip(), "record": record, "error": error}
         try:
             with open(self.DLQ_FILE, "a") as f:
                 f.write(orjson.dumps(failed_record).decode("utf-8") + ",")
@@ -19,14 +19,14 @@ class Databse(Base):
         except Exception as e:
             self.logger.error(f"Failed to save to DLQ file: {e}")
 
-    async def send_to_dlq(self, connection, query, record, error_message):
+    async def send_to_dlq(self, connection, query, record, error):
         """Inserts failed record into the DLQ table in Postgres."""
         try:
-            await connection.execute("INSERT INTO failed_inserts (query, record, error_message) VALUES ($1, $2, $3)", (query, record, error_message))
-            self.logger.info(f"Sent to DLQ: {record} - Error: {error_message}")
+            await connection.execute("INSERT INTO tbl_failed_inserts (failed_inserts_query, failed_inserts_record, failed_inserts_error) VALUES ($1, $2, $3)", (query, record, error))
+            self.logger.info(f"Sent to DLQ: {record} - Error: {error}")
         except Exception as e:
             self.logger.error(f"Failed to insert into DLQ: {record} - Error: {e}")
-            await self.save_dlq_to_file(query, record, error_message)  # Fallback to JSON file
+            await self.save_dlq_to_file(query, record, error)  # Fallback to JSON file
 
     async def insert_batch_with_retry(self, connection, query, batch, batch_id, consumer_id, retries=3):
         """Tries batch inserting data with retries. If all fail, moves to DLQ."""
