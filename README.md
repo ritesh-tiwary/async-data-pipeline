@@ -109,7 +109,7 @@ curl -X 'POST' \
 Response:
 ```json
 {
-  "task_id": "12345",
+  "task_id": "73027031-4d2a-4bd7-bc61-68c1b0bf3822",
   "status": "Processing"
 }
 ```
