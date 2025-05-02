@@ -24,6 +24,13 @@ async def get_users():
         rows = await conn.fetch("SELECT * FROM tbl_users ORDER BY id")
         return [dict(row) for row in rows]
 
+@app.get("/logs")
+async def get_logs():
+    await db.init_db_pool()
+    async with db.pool.acquire() as conn:
+        rows = await conn.fetch("SELECT * FROM tbl_failed_inserts ORDER BY id")
+        return [dict(row) for row in rows]
+
 # Producer function to read file content and put it in the queue
 async def producer(files: List[UploadFile], file_queue: asyncio.Queue):
     try:
