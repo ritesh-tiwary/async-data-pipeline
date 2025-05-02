@@ -7,6 +7,7 @@ from app.core.base import Base
 class Databse(Base):
     def __init__(self):
         super().__init__()
+        self.pool = None
         self.DLQ_FILE = "app/logs/failed_inserts.json"  # Optional: Store failed records in a JSON file
 
     async def save_dlq_to_file(self, query, record, error):
@@ -77,20 +78,23 @@ class Databse(Base):
         for _ in range(num_consumers):
             await queue.put(None)
 
-    async def create_db_pool(self):
+    async def init_db_pool(self):
         """Create a connection pool for Postgres."""
-        return await asyncpg.create_pool(**self.settings.POSTGRES_CONFIG)
+        if self.pool is None:
+            self.pool = await asyncpg.create_pool(**self.settings.POSTGRES_CONFIG)
+        self.logger.info(f"Current connections in use: {len(self.pool._holders)}")
 
-    async def insert(self, query, items, num_consumers = 2, batch_size = 2):
+    async def insert(self, query, items, batch_size = 2):
+        await self.init_db_pool()
         queue = asyncio.Queue()
-        pool = await self.create_db_pool()
+        num_consumers = self.settings.POSTGRES_CONFIG["max_size"]
 
         try:
             producer_task = asyncio.create_task(self.producer(queue, items, num_consumers))
-            consumers = [asyncio.create_task(self.consumer(queue, pool, query, consumer_id, batch_size)) for consumer_id in range(num_consumers)]
+            consumers = [asyncio.create_task(self.consumer(queue, self.pool, query, consumer_id, batch_size)) for consumer_id in range(num_consumers)]
 
             await producer_task                                         # Ensure all data is produced
             await queue.join()                                          # Wait until all tasks are processed
             await asyncio.gather(*consumers, return_exceptions=True)    # Ensure all consumers exit
         finally:
-            await pool.close()
+            await self.pool.close()

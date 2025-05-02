@@ -2,19 +2,27 @@ import asyncio
 import aiofiles
 from typing import List
 from fastapi import FastAPI, UploadFile, File
+from app.core.database import Database
 from app.api.v1.routers import storage_router
 
 from app.worker import celery
 from app.worker.tasks import add_with_retry
 from celery.result import AsyncResult
 
-
+db = Database()
 app = FastAPI()
 app.include_router(storage_router.router, prefix="/api/v1")
 
 @app.get('/')
 def root():
     return {"message": "Application is running"}
+
+@app.get("/users")
+async def get_users():
+    await db.init_db_pool()
+    async with db.pool.acquire() as conn:
+        rows = await conn.fetch("SELECT * FROM tbl_users ORDER BY id")
+        return [dict(row) for row in rows]
 
 # Producer function to read file content and put it in the queue
 async def producer(files: List[UploadFile], file_queue: asyncio.Queue):
