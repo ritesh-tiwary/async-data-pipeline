@@ -1,7 +1,9 @@
+import os
 import asyncio
 import aiofiles
 from typing import List
 from fastapi import FastAPI, UploadFile, File
+from app.settings import Settings
 from app.core.database import Database
 from app.api.v1.routers import storage_router
 
@@ -10,6 +12,7 @@ from app.worker.tasks import add_with_retry
 from celery.result import AsyncResult
 
 db = Database()
+settings = Settings()
 app = FastAPI()
 app.include_router(storage_router.router, prefix="/api/v1")
 
@@ -54,8 +57,8 @@ async def consumer(file_queue: asyncio.Queue):
             break
 
         filename, content = item
-        upload_path = f"app/upload/{filename}"
-        with open(upload_path, "w") as f:
+        upload_path = os.path.join(settings.STORAGE_DIR, filename)
+        with open(upload_path, "wb") as f:
             f.write(content)
         print(f"Created file: {filename} ({len(content)} bytes) at {upload_path}")
         file_queue.task_done()
