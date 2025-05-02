@@ -17,7 +17,7 @@ class JSONParser(Parser):
     def generate_duckdb_select_query(self, mapping_df, json_path, table_alias='j') -> str:
         """ Generate a DuckDB query to extract JSON fields based on the provided mapping. """
         select_clauses = [
-            f"CAST(json_extract({table_alias}, '{row['json_path']}') AS {row['duckdb_type'].upper()}) AS \"{row['column_name']}\""
+            f"CAST(json_extract_string({table_alias}, '{row['json_path']}') AS {row['duckdb_type'].upper()}) AS \"{row['column_name']}\""
             for _, row in mapping_df.iterrows()
         ]
 

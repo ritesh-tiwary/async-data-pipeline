@@ -34,11 +34,11 @@ class Database(Base):
         for attempt in range(1, retries + 1):
             try:
                 await connection.executemany(query, batch)
-                self.logger.info(f"Batch-{batch_id} inserted {len(batch)} records")
+                self.logger.info(f"Consumer-{consumer_id}: Batch-{batch_id} inserted {len(batch)} records")
                 return True
             except Exception as e:
                 ex = str(e)
-                self.logger.error(f"Batch-{batch_id} insert attempt {attempt} failed: {ex}")
+                self.logger.error(f"Consumer-{consumer_id}: Batch-{batch_id} insert attempt {attempt} failed: {ex}")
                 await asyncio.sleep(2**attempt)
 
         self.logger.error(f"Consumer-{consumer_id} failed to insert Batch-{batch_id} after {retries} attempts")
